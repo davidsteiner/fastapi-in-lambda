@@ -74,7 +74,7 @@ class ServerlessApiStack(Stack):
             handler="handler",
             architecture=Architecture.ARM_64,
             runtime=Runtime.PYTHON_3_9,
-            environment={"TABLE": table.table_name},
+            environment={"TABLE_NAME": table.table_name},
         )
         table.grant_read_write_data(handler)
 

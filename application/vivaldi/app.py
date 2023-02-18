@@ -1,8 +1,8 @@
-from typing import Literal
+import uuid
 
 from fastapi import FastAPI
 from mangum import Mangum
-from pydantic import BaseModel
+from vivaldi.persistence import Account, Transaction, open_account, store_transaction
 
 app = FastAPI(
     title="Vivaldi API",
@@ -11,36 +11,17 @@ app = FastAPI(
 )
 
 
-class Transaction(BaseModel):
-    """A bank transaction."""
-
-    action: Literal["deposit", "withdraw"]
-    amount: int
-
-
-class Balance(BaseModel):
-    """The balance of a user."""
-
-    user_id: str
-    balance: int
-
-
-class Transactions(Balance):
-    """The transactions and overall balance of a user."""
-
-    transactions: list[Transaction]
-
-
-@app.put("/user/{user_id}/transactions")
-def put_transaction(user_id: str, transaction: Transaction) -> Balance:
+@app.post("/account/{account_id}/transactions")
+def post_transaction(account_id: str, transaction: Transaction) -> Account:
     """Put a new transaction."""
-    return Balance(user_id=user_id, balance=100)
+    return store_transaction(account_id, transaction)
 
 
-@app.get("/user/{user_id}/transactions")
-def get_transactions(user_id: str) -> Transactions:
-    """Get all transactions and the overall balance."""
-    return Transactions(user_id=user_id, balance=100, transactions=[])
+@app.post("/account")
+def post_account() -> Account:
+    """Open a new account."""
+    account_id = uuid.uuid4().hex
+    return open_account(account_id)
 
 
 handler = Mangum(app, lifespan="off")
