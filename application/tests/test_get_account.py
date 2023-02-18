@@ -15,4 +15,4 @@ def test_get_existing_account(app_client: TestClient):
 def test_get_nonexistent_account_raises_404(app_client: TestClient):
     response = app_client.get("/account/missing_id")
     assert response.status_code == 404
-    assert response.json()["detail"] == "account not found"
+    assert response.json()["reason"] == "account missing_id does not exist"

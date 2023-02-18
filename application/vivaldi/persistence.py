@@ -4,6 +4,7 @@ from typing import Literal, Optional
 
 import boto3
 from pydantic import BaseModel, Field
+from vivaldi.exceptions import AccountNotFound, InsufficientFunds
 
 _ACCOUNT_SK = "summary"
 
@@ -57,20 +58,20 @@ def load_account(account_id: str) -> Optional[AccountRecord]:
     if item := response.get("Item"):
         return AccountRecord.parse_obj(item)
     else:
-        return None
+        raise AccountNotFound(account_id)
 
 
 def store_transaction(account_id: str, transaction: Transaction) -> AccountRecord:
     """Get the summary for a user."""
     previous_balance = load_account(account_id)
 
-    if not previous_balance:
-        raise AccountNotFound(f"no account found for {account_id}")
     if (
         transaction.action == "withdraw"
         and previous_balance.amount < transaction.amount
     ):
-        raise InsufficientFunds(f"account only has {previous_balance.amount}")
+        raise InsufficientFunds(
+            current_balance=previous_balance.amount, attempted_amount=transaction.amount
+        )
 
     new_balance = previous_balance.apply_transaction(transaction)
     _persist_transaction_and_balance(new_balance, transaction)
@@ -127,11 +128,3 @@ def _create_client():
 
 def _table_name() -> str:
     return os.environ["TABLE_NAME"]
-
-
-class AccountNotFound(Exception):
-    """Raised when no account exists for an ID."""
-
-
-class InsufficientFunds(Exception):
-    """The account has insufficient funds."""

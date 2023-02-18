@@ -1,8 +1,10 @@
 import uuid
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from mangum import Mangum
 from pydantic.main import BaseModel
+from vivaldi.exceptions import AccountNotFound, InsufficientFunds
 from vivaldi.persistence import (
     AccountRecord,
     Transaction,
@@ -48,9 +50,19 @@ def get_account(account_id) -> Account:
     record = load_account(account_id)
 
     if record:
-        return Account.from_record()
+        return Account.from_record(record)
     else:
         raise HTTPException(status_code=404, detail="account not found")
+
+
+@app.exception_handler(InsufficientFunds)
+def handle_insufficient_funds(_request: Request, exc: InsufficientFunds):
+    return JSONResponse(status_code=403, content={"reason": str(exc)})
+
+
+@app.exception_handler(AccountNotFound)
+def handle_account_not_found(_request: Request, exc: InsufficientFunds):
+    return JSONResponse(status_code=404, content={"reason": str(exc)})
 
 
 handler = Mangum(app, lifespan="off")
