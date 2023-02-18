@@ -22,6 +22,7 @@ aws-cdk-aws-apigatewayv2-integrations-alpha = "^2.63.1a0"
 aws-cdk-aws-lambda-python-alpha = "^2.63.1a0"
 
 [tool.poetry.group.application.dependencies]
+boto3 = "^1.26.74"
 fastapi = "^0.89.1"
 mangum = "^0.17.0"
 pydantic = "^1.10.4"

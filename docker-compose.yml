@@ -1,0 +1,11 @@
+version: '3.9'
+services:
+  db:
+    image: amazon/dynamodb-local
+    container_name: vivaldi-database
+    restart: always
+    volumes:
+      - ./local/dynamodb-data:/db_data
+    ports:
+      - "8010:8010"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /db_data -port 8010"

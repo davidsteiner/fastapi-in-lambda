@@ -13,3 +13,4 @@ infrastructure/cdk.context.json
 test-reports
 .vscode/
 application/requirements.txt
+local/
