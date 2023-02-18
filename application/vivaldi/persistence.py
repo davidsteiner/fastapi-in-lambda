@@ -15,7 +15,7 @@ class Transaction(BaseModel):
     amount: int
 
 
-class Account(BaseModel):
+class AccountRecord(BaseModel):
     """The overall balance."""
 
     account_id: str = Field(alias="pk")
@@ -37,9 +37,9 @@ class Account(BaseModel):
         )
 
 
-def open_account(account_id: str) -> Account:
+def open_account(account_id: str) -> AccountRecord:
     table = dynamodb_table()
-    account = Account(
+    account = AccountRecord(
         pk=account_id,
         amount=0,
         transaction_counter=0,
@@ -49,20 +49,20 @@ def open_account(account_id: str) -> Account:
     return account
 
 
-def get_account(account_id: str) -> Optional[Account]:
+def load_account(account_id: str) -> Optional[AccountRecord]:
     """Get the account for the supplied account ID."""
     table = dynamodb_table()
     response = table.get_item(Key={"pk": account_id, "sk": _ACCOUNT_SK})
 
     if item := response.get("Item"):
-        return Account.parse_obj(item)
+        return AccountRecord.parse_obj(item)
     else:
         return None
 
 
-def store_transaction(account_id: str, transaction: Transaction) -> Account:
+def store_transaction(account_id: str, transaction: Transaction) -> AccountRecord:
     """Get the summary for a user."""
-    previous_balance = get_account(account_id)
+    previous_balance = load_account(account_id)
 
     if not previous_balance:
         raise AccountNotFound(f"no account found for {account_id}")
@@ -78,7 +78,7 @@ def store_transaction(account_id: str, transaction: Transaction) -> Account:
     return new_balance
 
 
-def _persist_transaction_and_balance(account: Account, transaction: Transaction):
+def _persist_transaction_and_balance(account: AccountRecord, transaction: Transaction):
     client = _create_client()
 
     items = [
