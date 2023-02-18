@@ -1,0 +1,15 @@
+*.py[cod]
+*.log
+.coverage*
+coverage.xml
+.idea/
+.DS_Store
+cdk.out
+.venv
+__pycache__
+.mypy_cache
+.pytest_cache
+infrastructure/cdk.context.json
+test-reports
+.vscode/
+application/requirements.txt

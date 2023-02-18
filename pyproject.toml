@@ -1,0 +1,50 @@
+[tool.poetry]
+name = "serverless-python-api"
+version = "0.1.0"
+description = "A serverless application demonstrating the use of CDK, Lambda, FastApi and Mangum."
+authors = ["David Steiner <david_j_steiner@yahoo.co.nz>"]
+readme = "README.md"
+
+packages = [
+    { include = "vivaldi", from = "application" },
+    { include = "stacks", from = "infrastructure" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.group.infrastructure.dependencies]
+aws-cdk-lib = "^2.63.1"
+constructs = "^10.1.240"
+aws-cdk-aws-apigatewayv2-alpha = "^2.63.1a0"
+aws-cdk-aws-apigatewayv2-authorizers-alpha = "^2.64.0a0"
+aws-cdk-aws-apigatewayv2-integrations-alpha = "^2.63.1a0"
+aws-cdk-aws-lambda-python-alpha = "^2.63.1a0"
+
+[tool.poetry.group.application.dependencies]
+fastapi = "^0.89.1"
+mangum = "^0.17.0"
+pydantic = "^1.10.4"
+
+[tool.poetry.group.development.dependencies]
+black = "^23.1.0"
+pre-commit = "^3.0.4"
+uvicorn = "^0.20.0"
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
