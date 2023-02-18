@@ -9,6 +9,7 @@ from aws_cdk.aws_apigatewayv2_alpha import (
 from aws_cdk.aws_apigatewayv2_authorizers_alpha import HttpJwtAuthorizer
 from aws_cdk.aws_apigatewayv2_integrations_alpha import HttpLambdaIntegration
 from aws_cdk.aws_cognito import AuthFlow, UserPool, UserPoolClient
+from aws_cdk.aws_dynamodb import Attribute, AttributeType, BillingMode, Table
 from aws_cdk.aws_lambda import Architecture, Function, Runtime
 from constructs import Construct
 
@@ -26,10 +27,17 @@ ALLOWED_METHODS = [
 
 
 class ServerlessApiStack(Stack):
+    """A sample serverless stack.
+
+    The stack contains an HTTP API Gateway, a Lambda function to process requests coming
+    from the API Gateway, Cognito for authentication, and DynamoDB to store the application data.
+    """
+
     def __init__(self, scope: Construct, construct_id: str):
         super().__init__(scope, construct_id)
 
-        handler_function = self.build_handler_function()
+        table = self.dynamodb_table()
+        handler_function = self.build_handler_function(table)
         http_api = self.build_http_api()
         user_pool = self.create_user_pool()
         user_pool_client = self.add_user_pool_client(user_pool)
@@ -56,8 +64,9 @@ class ServerlessApiStack(Stack):
             description="The client ID of the Cognito client",
         )
 
-    def build_handler_function(self) -> Function:
-        return python_lambda.PythonFunction(
+    def build_handler_function(self, table: Table) -> Function:
+        """Build a Lambda function that will handle incoming requests sent through the API Gateway."""
+        handler = python_lambda.PythonFunction(
             self,
             "BackendLambda",
             entry="application/",
@@ -65,7 +74,11 @@ class ServerlessApiStack(Stack):
             handler="handler",
             architecture=Architecture.ARM_64,
             runtime=Runtime.PYTHON_3_9,
+            environment={"TABLE": table.table_name},
         )
+        table.grant_read_write_data(handler)
+
+        return handler
 
     def build_http_api(self) -> HttpApi:
         """Build the HTTP API."""
@@ -106,6 +119,7 @@ class ServerlessApiStack(Stack):
         )
 
     def create_user_pool(self) -> UserPool:
+        """Create a Cognito user pool."""
         return UserPool(self, "UserPool", user_pool_name="vivaldi-users")
 
     @staticmethod
@@ -113,7 +127,7 @@ class ServerlessApiStack(Stack):
         user_pool: UserPool,
         user_pool_client: UserPoolClient,
     ) -> HttpJwtAuthorizer:
-        """Build the request authorizer."""
+        """Build the JWT authorizer to restrict access to requests with a valid token for the user pool."""
         issuer = f"https://cognito-idp.{user_pool.env.region}.amazonaws.com/{user_pool.user_pool_id}"
         return HttpJwtAuthorizer(
             "JwtAuthorizer",
@@ -123,6 +137,18 @@ class ServerlessApiStack(Stack):
 
     @staticmethod
     def add_user_pool_client(user_pool: UserPool) -> UserPoolClient:
+        """Create a new client in the user pool."""
         return user_pool.add_client(
             "app-client", auth_flows=AuthFlow(admin_user_password=True)
+        )
+
+    def dynamodb_table(self):
+        """The DynamoDB table storing bank records."""
+        return Table(
+            self,
+            "VivaldiTable",
+            table_name="VivaldiBankRecords",
+            partition_key=Attribute(name="pk", type=AttributeType.STRING),
+            sort_key=Attribute(name="sk", type=AttributeType.STRING),
+            billing_mode=BillingMode.PAY_PER_REQUEST,
         )
