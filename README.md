@@ -24,19 +24,39 @@ pytest .
 
 # Deployments
 
-To run Docker for PythonLambda on M1 chip:
-
-```shell
-export DOCKER_DEFAULT_PLATFORM=linux/amd64
-```
-
-To export dependencies:
+You can deploy this application to your AWS account using CDK. Before you run CDK,
+export the dependencies into the `./application` folder, as the `PythonFunction`
+will look for the requirements here. Make sure only the `application` dependencies
+are exported:
 
 ```shell
 poetry export -o application/requirements.txt --only application
 ```
 
-Create a user:
+Run CDK to deploy:
+
+```shell
+cdk deploy
+```
+
+This requires Docker to be installed on your computer, as `PythonFunction`
+uses Docker for bundling the dependencies for the correct platform.
+
+
+> **Warning**
+>
+> At the time of writing this, bundling fails on M1 Macs if the following flag is not set:
+> ```shell
+> export DOCKER_DEFAULT_PLATFORM=linux/amd64
+> ```
+
+# Testing the deployed application
+
+The deployed application uses Cognito for authentication. The stack should output
+the Cognito user pool and client ID. Use these to create a user and get a password
+for API calls.
+
+To create a user:
 
 ```shell
 aws cognito-idp admin-create-user --user-pool-id $USER_POOL_ID --username $USERNAME
