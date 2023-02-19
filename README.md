@@ -1,6 +1,10 @@
 This repository contains an example for running FastAPI in Lambda using mangum, deployed through CDK.
 The application logic is not particularly interesting, it only serves to demonstrate the use of these tools.
 
+This stack uses Cognito for authentication, which I don't normally recommend,
+but it's the quickest way to put some authentication around an HTTP API Gateway
+on AWS.
+
 # Pre-requisites
 1. Python 3.9
 2. An AWS account
@@ -59,12 +63,26 @@ for API calls.
 To create a user:
 
 ```shell
-aws cognito-idp admin-create-user --user-pool-id $USER_POOL_ID --username $USERNAME
-aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username $USERNAME --password $PASSWORD --permanent
+aws cognito-idp admin-create-user --user-pool-id $USER_POOL_ID --username $USER_ID
+aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username $USER_ID --password $PASSWORD --permanent
 ```
 
-To get a password:
+To get a new access token:
 
 ```shell
-aws cognito-idp admin-initiate-auth --user-pool-id $USER_POOL_ID --client-id $CLIENT_ID --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters "USERNAME=$USERNAME,PASSWORD=$PASSWORD"
+TOKEN=aws cognito-idp admin-initiate-auth --user-pool-id $USER_POOL_ID --client-id $CLIENT_ID --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters "USERNAME=$USER_ID,PASSWORD=$PASSWORD" --profile eloscript | jq -r ".AuthenticationResult.AccessToken"
+```
+
+Using the access token, we can now attempt to create a new account:
+
+```shell
+# API_URL is the URL printed as CloudFormation output for the API Gateway
+curl -X POST -H "Content-Type: application/json" -H "Authorization: $TOKEN" $API_URL/account
+```
+
+This will return an account ID and a balance of 0. Using the account ID, you can
+execute transactions for the account:
+
+```shell
+curl -X POST -H "Content-Type: application/json" -H "Authorization: $TOKEN" -d '{"action": "deposit", "amount": 100}' $API_URL/account/$ACCOUNT_ID/transactions
 ```
