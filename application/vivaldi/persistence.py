@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from typing import Literal, Optional
+from typing import Literal
 
 import boto3
 from pydantic import BaseModel, Field
@@ -50,7 +50,7 @@ def open_account(account_id: str) -> AccountRecord:
     return account
 
 
-def load_account(account_id: str) -> Optional[AccountRecord]:
+def load_account(account_id: str) -> AccountRecord:
     """Get the account for the supplied account ID."""
     table = dynamodb_table()
     response = table.get_item(Key={"pk": account_id, "sk": _ACCOUNT_SK})
