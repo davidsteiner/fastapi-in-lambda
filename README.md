@@ -1,3 +1,29 @@
+This repository contains an example for running FastAPI in Lambda using mangum, deployed through CDK.
+The application logic is not particularly interesting, it only serves to demonstrate the use of these tools.
+
+# Pre-requisites
+1. Python 3.9
+2. An AWS account
+3. [CDK](https://aws.amazon.com/cdk/) to deploy to AWS
+4. [Docker](https://www.docker.com/), both for building the Python bundle using CDK and for running DynamoDB locally
+5. [poetry](https://python-poetry.org/) for package management
+
+# Local Development
+
+Install all dependencies using poetry:
+
+```shell
+poetry install
+```
+
+The tests should be passing once all dependencies are installed:
+
+```shell
+pytest .
+```
+
+# Deployments
+
 To run Docker for PythonLambda on M1 chip:
 
 ```shell
