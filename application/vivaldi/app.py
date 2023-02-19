@@ -25,7 +25,7 @@ class Account(BaseModel):
     balance: int
 
     @staticmethod
-    def from_record(account_record: AccountRecord):
+    def from_record(account_record: AccountRecord) -> "Account":
         return Account(
             account_id=account_record.account_id, balance=account_record.amount
         )
@@ -45,7 +45,7 @@ def post_account() -> Account:
 
 
 @app.get("/account/{account_id}")
-def get_account(account_id) -> Account:
+def get_account(account_id: str) -> Account:
     """Get the details of an account."""
     record = load_account(account_id)
 
@@ -56,12 +56,14 @@ def get_account(account_id) -> Account:
 
 
 @app.exception_handler(InsufficientFunds)
-def handle_insufficient_funds(_request: Request, exc: InsufficientFunds):
+def handle_insufficient_funds(
+    _request: Request, exc: InsufficientFunds
+) -> JSONResponse:
     return JSONResponse(status_code=403, content={"reason": str(exc)})
 
 
 @app.exception_handler(AccountNotFound)
-def handle_account_not_found(_request: Request, exc: InsufficientFunds):
+def handle_account_not_found(_request: Request, exc: InsufficientFunds) -> JSONResponse:
     return JSONResponse(status_code=404, content={"reason": str(exc)})
 
 

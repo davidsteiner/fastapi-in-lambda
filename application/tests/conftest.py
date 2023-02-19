@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Any, Generator
 
 import boto3
 import pytest
@@ -10,13 +10,15 @@ _TABLE_NAME = "TestTable"
 
 
 @pytest.fixture(autouse=True)
-def mock_env(monkeypatch):
+def mock_env(monkeypatch) -> None:  # type: ignore
     monkeypatch.setenv("AWS_DEFAULT_REGION", "eu-west-1")
     monkeypatch.setenv("TABLE_NAME", _TABLE_NAME)
 
 
 @pytest.fixture(scope="session", autouse=True)
-def dynamodb_table():
+def dynamodb_client() -> (
+    Any
+):  # we don't really care about this type and boto3 typing is a pain
     with mock_dynamodb():
         client = boto3.client("dynamodb", region_name="eu-west-1")
         client.create_table(

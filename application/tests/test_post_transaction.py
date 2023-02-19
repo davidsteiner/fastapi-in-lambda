@@ -1,4 +1,7 @@
-def test_deposit(app_client):
+from fastapi.testclient import TestClient
+
+
+def test_deposit(app_client: TestClient) -> None:
     response = app_client.post("/account")
 
     assert response.status_code == 200
@@ -19,7 +22,7 @@ def test_deposit(app_client):
     assert response.json()["balance"] == 200
 
 
-def test_withdraw(app_client):
+def test_withdraw(app_client: TestClient) -> None:
     response = app_client.post("/account")
 
     assert response.status_code == 200
@@ -44,7 +47,7 @@ def test_withdraw(app_client):
     assert response.json()["balance"] == 50
 
 
-def test_withdrawing_too_much_fails(app_client):
+def test_withdrawing_too_much_fails(app_client: TestClient) -> None:
     response = app_client.post("/account")
 
     assert response.status_code == 200
@@ -71,7 +74,9 @@ def test_withdrawing_too_much_fails(app_client):
     )
 
 
-def test_transaction_for_missing_account_responds_with_404(app_client):
+def test_transaction_for_missing_account_responds_with_404(
+    app_client: TestClient,
+) -> None:
     payload = {
         "action": "deposit",
         "amount": 100,

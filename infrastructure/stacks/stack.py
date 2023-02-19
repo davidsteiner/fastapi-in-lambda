@@ -142,7 +142,7 @@ class ServerlessApiStack(Stack):
             "app-client", auth_flows=AuthFlow(admin_user_password=True)
         )
 
-    def dynamodb_table(self):
+    def dynamodb_table(self) -> Table:
         """The DynamoDB table storing bank records."""
         return Table(
             self,

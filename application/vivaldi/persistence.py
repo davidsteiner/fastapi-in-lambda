@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from typing import Literal
+from typing import Any, Literal
 
 import boto3
 from pydantic import BaseModel, Field
@@ -23,7 +23,7 @@ class AccountRecord(BaseModel):
     amount: int
     transaction_counter: int
 
-    def apply_transaction(self, transaction: Transaction):
+    def apply_transaction(self, transaction: Transaction) -> "AccountRecord":
         """Apply a transaction to this balance."""
         updated_amount = (
             self.amount + transaction.amount
@@ -79,7 +79,9 @@ def store_transaction(account_id: str, transaction: Transaction) -> AccountRecor
     return new_balance
 
 
-def _persist_transaction_and_balance(account: AccountRecord, transaction: Transaction):
+def _persist_transaction_and_balance(
+    account: AccountRecord, transaction: Transaction
+) -> None:
     client = _create_client()
 
     items = [
@@ -112,7 +114,7 @@ def _persist_transaction_and_balance(account: AccountRecord, transaction: Transa
 
 
 @lru_cache(maxsize=1)
-def dynamodb_table():
+def dynamodb_table() -> Any:
     resource = boto3.resource(
         "dynamodb", endpoint_url=os.getenv("DYNAMODB_ENDPOINT_OVERRIDE")
     )
@@ -120,7 +122,7 @@ def dynamodb_table():
 
 
 @lru_cache(maxsize=1)
-def _create_client():
+def _create_client() -> Any:
     return boto3.client(
         "dynamodb", endpoint_url=os.getenv("DYNAMODB_ENDPOINT_OVERRIDE")
     )
