@@ -90,3 +90,9 @@ execute transactions for the account:
 ```shell
 curl -X POST -H "Content-Type: application/json" -H "Authorization: $TOKEN" -d '{"action": "deposit", "amount": 100}' $API_URL/account/$ACCOUNT_ID/transactions
 ```
+
+# Contributing
+As all things in the rapidly evolving cloud ecosystem, this guide will
+probably get outdated quickly. If you find anything, that's no longer
+working (or perhaps never quite worked), feel free to raise a PR
+or an issue. All contributions are welcome!
