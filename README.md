@@ -1,5 +1,9 @@
-This repository contains an example for running FastAPI in Lambda using mangum, deployed through CDK.
-The application logic is not particularly interesting, it only serves to demonstrate the use of these tools.
+This repository contains an example for running [FastAPI](https://fastapi.tiangolo.com/)
+in Lambda using [mangum](https://mangum.io), deployed through CDK.
+Mangum is an ASGI-compatible adapter for Lambda, enabling
+you to leverage regular ASGI frameworks in Lambda functions.
+The application logic is not particularly interesting,
+it only serves to demonstrate the use of these tools.
 
 This stack uses Cognito for authentication, which I don't normally recommend,
 but it's the quickest way to put some authentication around an HTTP API Gateway
