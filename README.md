@@ -74,7 +74,7 @@ aws cognito-idp admin-set-user-password --user-pool-id $USER_POOL_ID --username 
 To get a new access token:
 
 ```shell
-TOKEN=aws cognito-idp admin-initiate-auth --user-pool-id $USER_POOL_ID --client-id $CLIENT_ID --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters "USERNAME=$USER_ID,PASSWORD=$PASSWORD" --profile eloscript | jq -r ".AuthenticationResult.AccessToken"
+TOKEN=`aws cognito-idp admin-initiate-auth --user-pool-id $USER_POOL_ID --client-id $CLIENT_ID --auth-flow ADMIN_USER_PASSWORD_AUTH --auth-parameters "USERNAME=$USER_ID,PASSWORD=$PASSWORD" --profile eloscript | jq -r ".AuthenticationResult.AccessToken"`
 ```
 
 Using the access token, we can now attempt to create a new account:
